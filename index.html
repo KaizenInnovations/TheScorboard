@@ -181,7 +181,27 @@
     <script>
         const prices = {
             foundation_monthly: 520,
-// ... existing code ... -->
+            foundation_pif3: 520 * 0.90,
+            foundation_pif6: 520 * 0.85,
+            accelerator_monthly: 720,
+            accelerator_pif3: 720 * 0.90,
+            accelerator_pif6: 720 * 0.85,
+            vip_monthly: 880,
+            vip_pif3: 880 * 0.90,
+            vip_pif6: 880 * 0.85,
+            online: 15
+        };
+
+        const hours = {
+            foundation_monthly: 8,
+            foundation_pif3: 8,
+            foundation_pif6: 8,
+            accelerator_monthly: 12,
+            accelerator_pif3: 12,
+            accelerator_pif6: 12,
+            vip_monthly: 16,
+            vip_pif3: 16,
+            vip_pif6: 16,
             online: 10 / 60 // 10 minutes
         };
 
@@ -225,5 +245,22 @@
 
         function updateClientCount(id, change) {
             const input = document.getElementById(id);
-// ... existing code ... -->
+            let currentValue = parseInt(input.value) || 0;
+            currentValue += change;
+            if (currentValue < 0) {
+                currentValue = 0;
+            }
+            input.value = currentValue;
+            calculateTotals();
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateTotals);
+        });
+
+        // Initial calculation on page load
+        window.addEventListener('load', calculateTotals);
+    </script>
+</body>
+</html>
 
