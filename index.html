@@ -181,27 +181,7 @@
     <script>
         const prices = {
             foundation_monthly: 520,
-            foundation_pif3: 520 * 0.90,
-            foundation_pif6: 520 * 0.85,
-            accelerator_monthly: 720,
-            accelerator_pif3: 720 * 0.90,
-            accelerator_pif6: 720 * 0.85,
-            vip_monthly: 880,
-            vip_pif3: 880 * 0.90,
-            vip_pif6: 880 * 0.85,
-            online: 15
-        };
-
-        const hours = {
-            foundation_monthly: 8,
-            foundation_pif3: 8,
-            foundation_pif6: 8,
-            accelerator_monthly: 12,
-            accelerator_pif3: 12,
-            accelerator_pif6: 12,
-            vip_monthly: 16,
-            vip_pif3: 16,
-            vip_pif6: 16,
+// ... existing code ... -->
             online: 10 / 60 // 10 minutes
         };
 
@@ -211,20 +191,30 @@
             let totalRevenue = 0;
             let totalHours = 0;
             let totalClients = 0;
+            let annualRevenue = 0;
 
             for (const id in prices) {
                 const inputElement = document.getElementById(id);
                 if (!inputElement) continue;
 
                 const count = parseInt(inputElement.value) || 0;
+                const monthlyValue = count * prices[id];
                 
                 totalClients += count;
-                totalRevenue += count * prices[id];
+                totalRevenue += monthlyValue;
                 totalHours += count * hours[id];
+
+                // Correctly calculate annual revenue based on commitment type
+                if (id.includes('_pif3')) {
+                    annualRevenue += monthlyValue * 3;
+                } else if (id.includes('_pif6')) {
+                    annualRevenue += monthlyValue * 6;
+                } else { // Monthly and online clients pay for 12 months
+                    annualRevenue += monthlyValue * 12;
+                }
             }
 
             const avgHourly = totalHours > 0 ? (totalRevenue / totalHours) : 0;
-            const annualRevenue = totalRevenue * 12;
 
             document.getElementById('total-clients').textContent = totalClients;
             document.getElementById('total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
@@ -235,22 +225,5 @@
 
         function updateClientCount(id, change) {
             const input = document.getElementById(id);
-            let currentValue = parseInt(input.value) || 0;
-            currentValue += change;
-            if (currentValue < 0) {
-                currentValue = 0;
-            }
-            input.value = currentValue;
-            calculateTotals();
-        }
-
-        inputs.forEach(input => {
-            input.addEventListener('input', calculateTotals);
-        });
-
-        // Initial calculation on page load
-        window.addEventListener('load', calculateTotals);
-    </script>
-</body>
-</html>
+// ... existing code ... -->
 
