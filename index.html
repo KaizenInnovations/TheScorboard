@@ -28,6 +28,7 @@
         /* Hidden input field for typing on the canvas */
         #canvas-input {
             position: absolute;
+            z-index: 10; /* Ensures input is on top of the canvas */
             display: none;
             background: transparent;
             border: 1px solid #F59E0B; /* Amber for visibility */
@@ -110,14 +111,14 @@
 
             // Header
             ctx.fillStyle = config.colors.accent;
-            ctx.font = `400 ${isMobile ? '28px' : '40px'} Anton`;
+            ctx.font = `400 ${isMobile ? '32px' : '48px'} Anton`;
             ctx.textAlign = 'center';
             ctx.fillText('KAIZEN x FF // COMMAND CENTER', canvas.width / 2, currentY);
-            currentY += isMobile ? 40 : 60;
+            currentY += isMobile ? 40 : 70;
             
             const mainWidth = canvas.width - (padding * 2);
-            const totalsWidth = isMobile ? mainWidth : mainWidth * 0.3;
-            const inputsWidth = isMobile ? mainWidth : mainWidth * 0.65;
+            const totalsWidth = isMobile ? mainWidth : mainWidth * 0.33;
+            const inputsWidth = isMobile ? mainWidth : mainWidth * 0.62;
             const startX = padding;
             
             let totalsHeight = drawTotals(isMobile ? startX : startX + inputsWidth + (mainWidth * 0.05), currentY, totalsWidth);
@@ -134,7 +135,7 @@
             cardX += cardWidth + 10;
             drawKaizenCard(cardX, inputsY, cardWidth, 'VIP', 'vip');
             
-            inputsY += 280; // Height of Kaizen cards
+            inputsY += 320; // Increased height of Kaizen cards
 
             // FF Group
             drawInputGroup(startX, inputsY, inputsWidth, 'FUCKING FITNESS', config.colors.ff, [
@@ -156,10 +157,10 @@
                     monthlyRevenue += count * (config.prices[id] / 6); annualRevenue += count * config.prices[id];
                 }
             }
-            const itemHeight = 90, headerHeight = 60, totalHeight = headerHeight + (4 * itemHeight);
+            const itemHeight = 100, headerHeight = 70, totalHeight = headerHeight + (4 * itemHeight);
             drawRoundedRect(x, y, w, totalHeight, 16, '#1F2937');
-            ctx.fillStyle = config.colors.text; ctx.font = '700 18px Roboto'; ctx.textAlign = 'center';
-            ctx.fillText('MISSION TOTALS', x + w / 2, y + 35);
+            ctx.fillStyle = config.colors.text; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText('MISSION TOTALS', x + w / 2, y + 40);
             let itemY = y + headerHeight;
             drawTotalItem(x, itemY, w, 'TOTAL ROSTER', totalClients.toFixed(0));
             drawTotalItem(x, itemY + itemHeight, w, 'PROJECTED MONTHLY', `$${monthlyRevenue.toFixed(2)}`);
@@ -169,66 +170,66 @@
         }
         
         function drawTotalItem(x, y, w, label, value) {
-            ctx.fillStyle = config.colors.accent; ctx.font = '700 14px Roboto';
-            ctx.fillText(label, x + w/2, y + 30);
-            ctx.fillStyle = '#FFFFFF'; ctx.font = `900 ${value.length > 8 ? '28px' : '36px'} Roboto`;
-            ctx.fillText(value, x + w/2, y + 65);
+            ctx.fillStyle = config.colors.accent; ctx.font = '700 16px Roboto';
+            ctx.fillText(label, x + w/2, y + 35);
+            ctx.fillStyle = '#FFFFFF'; ctx.font = `900 ${value.length > 8 ? '32px' : '40px'} Roboto`;
+            ctx.fillText(value, x + w/2, y + 70);
         }
 
         function drawKaizenCard(x, y, w, title, baseId) {
-            const h = 250;
+            const h = 290;
             drawRoundedRect(x, y, w, h, 16, '#1F2937');
-            ctx.fillStyle = config.colors.kaizen; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
-            ctx.fillText(title, x + w / 2, y + 30);
-            drawInputItem(x + 15, y + 60, w - 30, `${baseId}_monthly`, 'Monthly');
-            drawInputItem(x + 15, y + 120, w - 30, `${baseId}_pif3`, 'PIF 3-Mo');
-            drawInputItem(x + 15, y + 180, w - 30, `${baseId}_pif6`, 'PIF 6-Mo');
+            ctx.fillStyle = config.colors.kaizen; ctx.font = '900 22px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText(title, x + w / 2, y + 35);
+            drawInputItem(x + 15, y + 70, w - 30, `${baseId}_monthly`, 'Monthly');
+            drawInputItem(x + 15, y + 140, w - 30, `${baseId}_pif3`, 'PIF 3-Mo');
+            drawInputItem(x + 15, y + 210, w - 30, `${baseId}_pif6`, 'PIF 6-Mo');
         }
         
         function drawInputGroup(x, y, w, title, color, items) {
-            const h = 60 + (items.length * 60);
+            const h = 70 + (items.length * 70);
             drawRoundedRect(x, y, w, h, 16, '#1F2937');
-            ctx.fillStyle = color; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
-            ctx.fillText(title, x + w / 2, y + 35);
-            let itemY = y + 60;
+            ctx.fillStyle = color; ctx.font = '900 22px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText(title, x + w / 2, y + 40);
+            let itemY = y + 70;
             items.forEach(item => {
                 drawInputItem(x + 15, itemY, w - 30, item.id, item.label);
-                itemY += 60;
+                itemY += 70;
             });
         }
 
         function drawInputItem(x, y, w, id, label) {
-            ctx.fillStyle = config.colors.textMuted; ctx.font = '400 14px Roboto';
+            ctx.fillStyle = config.colors.textMuted; ctx.font = '700 16px Roboto';
             ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-            ctx.fillText(label, x, y + 16);
+            ctx.fillText(label, x, y + 20);
 
-            const btnSize = 32, inputW = 64, inputH = 32;
+            const btnSize = 38, inputW = 70, inputH = 38;
             const plusX = x + w - btnSize;
-            const numX = plusX - inputW - 10;
-            const minusX = numX - btnSize - 10;
+            const numX = plusX - inputW - 12;
+            const minusX = numX - btnSize - 12;
 
             const isHoverMinus = mousePos.x >= minusX && mousePos.x <= minusX + btnSize && mousePos.y >= y && mousePos.y <= y + btnSize;
             const isHoverPlus = mousePos.x >= plusX && mousePos.x <= plusX + btnSize && mousePos.y >= y && mousePos.y <= y + btnSize;
             const isHoverNum = mousePos.x >= numX && mousePos.x <= numX + inputW && mousePos.y >= y && mousePos.y <= y + inputH;
             
             // Minus Button
-            drawRoundedRect(minusX, y, btnSize, btnSize, 16, isHoverMinus ? config.colors.accent : '#4B5563');
-            ctx.fillStyle = '#FFF'; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
-            ctx.fillText('-', minusX + btnSize / 2, y + 18);
+            drawRoundedRect(minusX, y, btnSize, btnSize, 19, isHoverMinus ? config.colors.accent : '#4B5563');
+            ctx.fillStyle = '#FFF'; ctx.font = '900 22px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText('-', minusX + btnSize / 2, y + 21);
             interactiveElements[`${id}_minus`] = { x: minusX, y, w: btnSize, h: btnSize, action: () => { if(state[id] > 0) state[id]--; } };
 
             // Number Display / Input Area
             if (activeInput !== id) {
                 drawRoundedRect(numX, y, inputW, inputH, 8, isHoverNum ? '#374151' : '#111827');
-                ctx.fillStyle = '#FFF'; ctx.font = '900 18px Roboto';
-                ctx.fillText(state[id], numX + inputW / 2, y + 17);
+                ctx.fillStyle = '#FFF'; ctx.font = '900 20px Roboto';
+                ctx.fillText(state[id], numX + inputW / 2, y + 20);
             }
             interactiveElements[`${id}_input`] = { x: numX, y, w: inputW, h: inputH, action: () => showInput(id, numX, y, inputW, inputH) };
             
             // Plus Button
-            drawRoundedRect(plusX, y, btnSize, btnSize, 16, isHoverPlus ? config.colors.accent : '#4B5563');
-            ctx.fillStyle = '#FFF'; ctx.font = '700 20px Roboto';
-            ctx.fillText('+', plusX + btnSize / 2, y + 18);
+            drawRoundedRect(plusX, y, btnSize, btnSize, 19, isHoverPlus ? config.colors.accent : '#4B5563');
+            ctx.fillStyle = '#FFF'; ctx.font = '900 22px Roboto';
+            ctx.fillText('+', plusX + btnSize / 2, y + 21);
             interactiveElements[`${id}_plus`] = { x: plusX, y, w: btnSize, h: btnSize, action: () => { state[id]++; } };
         }
 
@@ -243,7 +244,7 @@
             textInput.style.top = `${rect.top + y / dpr}px`;
             textInput.style.width = `${w / dpr}px`;
             textInput.style.height = `${h / dpr}px`;
-            textInput.style.fontSize = `${18 / dpr}px`;
+            textInput.style.fontSize = `${20 / dpr}px`;
             
             textInput.value = state[id];
             textInput.focus();
@@ -311,4 +312,5 @@
     </script>
 </body>
 </html>
+
 
