@@ -13,7 +13,7 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
-            background-color: #FEFBF6; /* Soft off-white */
+            background-color: #FEFBF6;
         }
         #dashboard-container {
             width: 100vw;
@@ -31,7 +31,7 @@
             z-index: 10;
             display: none;
             background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #D6AD60; /* Gold accent */
+            border: 2px solid #D6AD60;
             color: #333;
             text-align: center;
             font-family: 'Poppins', sans-serif;
@@ -69,13 +69,8 @@
 
         const config = {
             colors: { 
-                background: '#FEFBF6',
-                card: '#FFFFFF',
-                primary: '#E0BBE4', // Lavender
-                secondary: '#FFDFD3', // Soft Pink
-                accent: '#D6AD60',   // Gold
-                text: '#333333',
-                textMuted: '#A9A9A9'
+                background: '#FEFBF6', card: '#FFFFFF', primary: '#E0BBE4', 
+                secondary: '#FFDFD3', accent: '#D6AD60', text: '#333333', textMuted: '#A9A9A9'
             },
             prices: {
                 foundation_monthly: 520, foundation_pif3: 520 * 3 * 0.90, foundation_pif6: 520 * 6 * 0.85,
@@ -87,9 +82,7 @@
                 foundation_monthly: 8, foundation_pif3: 8, foundation_pif6: 8,
                 accelerator_monthly: 12, accelerator_pif3: 12, accelerator_pif6: 12,
                 vip_monthly: 16, vip_pif3: 16, vip_pif6: 16,
-                online_coaching: 10/60, 
-                livestream: 0,
-                onlyfans: 0
+                online_coaching: 10/60, livestream: 0, onlyfans: 0
             }
         };
 
@@ -109,7 +102,7 @@
             ctx.fill();
             if (strokeColor) {
                 ctx.strokeStyle = strokeColor;
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 2; // Bolder stroke for clarity
                 ctx.stroke();
             }
         }
@@ -144,11 +137,11 @@
             const cardWidth = isMobile ? inputsWidth : (inputsWidth - 20) / 3;
             
             let cardX = startX;
-            drawKaizenCard(cardX, inputsY, cardWidth, 'FOUNDATION', config.colors.primary);
+            drawKaizenCard(cardX, inputsY, cardWidth, 'FOUNDATION', config.colors.primary, 'foundation');
             cardX += cardWidth + 10;
-            drawKaizenCard(cardX, inputsY, cardWidth, 'ACCELERATOR', config.colors.secondary);
+            drawKaizenCard(cardX, inputsY, cardWidth, 'ACCELERATOR', config.colors.secondary, 'accelerator');
             cardX += cardWidth + 10;
-            drawKaizenCard(cardX, inputsY, cardWidth, 'VIP', config.colors.accent);
+            drawKaizenCard(cardX, inputsY, cardWidth, 'VIP', config.colors.accent, 'vip');
             
             inputsY += 320;
 
@@ -158,9 +151,9 @@
                 { id: 'onlyfans', label: 'Subscription' },
             ]);
         }
-
+        
         function drawTotals(x, y, w) {
-            let totalClients = 0, monthlyRevenue = 0, annualRevenue = 0, totalHours = 0;
+             let totalClients = 0, monthlyRevenue = 0, annualRevenue = 0, totalHours = 0;
             for(const id in state) {
                 const count = state[id]; totalClients += count; totalHours += count * config.hours[id];
                 if (id.includes('_monthly') || id.includes('online') || id.includes('livestream') || id.includes('onlyfans')) {
@@ -194,14 +187,14 @@
             ctx.fillText(value, x + w/2, y + 70);
         }
 
-        function drawKaizenCard(x, y, w, title, color) {
+        function drawKaizenCard(x, y, w, title, color, baseId) {
             const h = 290;
             drawRoundedRect(x, y, w, h, 20, config.colors.card, color + '33');
             ctx.fillStyle = color; ctx.font = `700 22px 'Playfair Display'`; ctx.textAlign = 'center';
             ctx.fillText(title, x + w / 2, y + 35);
-            drawInputItem(x + 15, y + 70, w - 30, `${title.toLowerCase()}_monthly`, 'Monthly');
-            drawInputItem(x + 15, y + 140, w - 30, `${title.toLowerCase()}_pif3`, 'PIF 3-Mo');
-            drawInputItem(x + 15, y + 210, w - 30, `${title.toLowerCase()}_pif6`, 'PIF 6-Mo');
+            drawInputItem(x + 15, y + 70, w - 30, `${baseId}_monthly`, 'Monthly');
+            drawInputItem(x + 15, y + 140, w - 30, `${baseId}_pif3`, 'PIF 3-Mo');
+            drawInputItem(x + 15, y + 210, w - 30, `${baseId}_pif6`, 'PIF 6-Mo');
         }
         
         function drawInputGroup(x, y, w, title, color, items) {
@@ -251,11 +244,11 @@
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
             textInput.style.display = 'block';
-            textInput.style.left = `${rect.left + x / dpr}px`;
-            textInput.style.top = `${rect.top + y / dpr}px`;
-            textInput.style.width = `${w / dpr}px`;
-            textInput.style.height = `${h / dpr}px`;
-            textInput.style.fontSize = `${20 / dpr}px`;
+            textInput.style.left = `${rect.left + x}px`;
+            textInput.style.top = `${rect.top + y}px`;
+            textInput.style.width = `${w}px`;
+            textInput.style.height = `${h}px`;
+            textInput.style.fontSize = `${20}px`;
             textInput.value = state[id];
             setTimeout(() => textInput.focus(), 0);
             textInput.oninput = () => {
@@ -272,10 +265,9 @@
         }
 
         function handleEvents(event) {
-            const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            const x = (event.clientX - rect.left) * dpr;
-            const y = (event.clientY - rect.top) * dpr;
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
             
             if (event.type === 'mousemove') {
                 mousePos = { x, y };
@@ -312,6 +304,8 @@
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
             ctx.scale(dpr, dpr);
             draw();
         }
@@ -325,3 +319,4 @@
     </script>
 </body>
 </html>
+
