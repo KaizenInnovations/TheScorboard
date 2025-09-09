@@ -25,13 +25,12 @@
             background-color: #111827;
             cursor: default;
         }
-        /* Hidden input field for typing on the canvas */
         #canvas-input {
             position: absolute;
-            z-index: 10; /* Ensures input is on top of the canvas */
+            z-index: 10;
             display: none;
             background: transparent;
-            border: 1px solid #F59E0B; /* Amber for visibility */
+            border: 2px solid #F59E0B;
             color: white;
             text-align: center;
             font-family: 'Roboto', sans-serif;
@@ -60,7 +59,6 @@
         const ctx = canvas.getContext('2d');
         const textInput = document.getElementById('canvas-input');
 
-        // --- STATE & CONFIG ---
         let state = {
             foundation_monthly: 0, foundation_pif3: 0, foundation_pif6: 0,
             accelerator_monthly: 0, accelerator_pif3: 0, accelerator_pif6: 0,
@@ -88,7 +86,6 @@
         let mousePos = { x: -1, y: -1 };
         let activeInput = null;
 
-        // --- UTILITY ---
         function drawRoundedRect(x, y, w, h, r, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -100,23 +97,23 @@
             ctx.fill();
         }
 
-        // --- DRAWING ---
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const dpr = window.devicePixelRatio || 1;
+            ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
             interactiveElements = {};
 
-            const isMobile = canvas.width / (window.devicePixelRatio || 1) < 1024;
-            const padding = Math.max(20, canvas.width * 0.03 / (window.devicePixelRatio || 1));
+            const isMobile = canvas.width / dpr < 1024;
+            const padding = Math.max(20, (canvas.width / dpr) * 0.03);
             let currentY = padding * 1.5;
 
             // Header
             ctx.fillStyle = config.colors.accent;
             ctx.font = `400 ${isMobile ? '32px' : '48px'} Anton`;
             ctx.textAlign = 'center';
-            ctx.fillText('KAIZEN x FF // COMMAND CENTER', canvas.width / 2, currentY);
+            ctx.fillText('KAIZEN x FF // COMMAND CENTER', (canvas.width / dpr) / 2, currentY);
             currentY += isMobile ? 40 : 70;
             
-            const mainWidth = canvas.width - (padding * 2);
+            const mainWidth = (canvas.width / dpr) - (padding * 2);
             const totalsWidth = isMobile ? mainWidth : mainWidth * 0.33;
             const inputsWidth = isMobile ? mainWidth : mainWidth * 0.62;
             const startX = padding;
@@ -127,7 +124,6 @@
 
             const cardWidth = isMobile ? inputsWidth : (inputsWidth - 20) / 3;
             
-            // Kaizen Cards
             let cardX = startX;
             drawKaizenCard(cardX, inputsY, cardWidth, 'FOUNDATION', 'foundation');
             cardX += cardWidth + 10;
@@ -135,9 +131,8 @@
             cardX += cardWidth + 10;
             drawKaizenCard(cardX, inputsY, cardWidth, 'VIP', 'vip');
             
-            inputsY += 320; // Increased height of Kaizen cards
+            inputsY += 320;
 
-            // FF Group
             drawInputGroup(startX, inputsY, inputsWidth, 'FUCKING FITNESS', config.colors.ff, [
                 { id: 'online_coaching', label: 'Online Coaching Pkg' },
                 { id: 'livestream', label: 'Livestream Addon' },
@@ -212,13 +207,11 @@
             const isHoverPlus = mousePos.x >= plusX && mousePos.x <= plusX + btnSize && mousePos.y >= y && mousePos.y <= y + btnSize;
             const isHoverNum = mousePos.x >= numX && mousePos.x <= numX + inputW && mousePos.y >= y && mousePos.y <= y + inputH;
             
-            // Minus Button
             drawRoundedRect(minusX, y, btnSize, btnSize, 19, isHoverMinus ? config.colors.accent : '#4B5563');
             ctx.fillStyle = '#FFF'; ctx.font = '900 22px Roboto'; ctx.textAlign = 'center';
             ctx.fillText('-', minusX + btnSize / 2, y + 21);
             interactiveElements[`${id}_minus`] = { x: minusX, y, w: btnSize, h: btnSize, action: () => { if(state[id] > 0) state[id]--; } };
 
-            // Number Display / Input Area
             if (activeInput !== id) {
                 drawRoundedRect(numX, y, inputW, inputH, 8, isHoverNum ? '#374151' : '#111827');
                 ctx.fillStyle = '#FFF'; ctx.font = '900 20px Roboto';
@@ -226,31 +219,31 @@
             }
             interactiveElements[`${id}_input`] = { x: numX, y, w: inputW, h: inputH, action: () => showInput(id, numX, y, inputW, inputH) };
             
-            // Plus Button
             drawRoundedRect(plusX, y, btnSize, btnSize, 19, isHoverPlus ? config.colors.accent : '#4B5563');
             ctx.fillStyle = '#FFF'; ctx.font = '900 22px Roboto';
             ctx.fillText('+', plusX + btnSize / 2, y + 21);
             interactiveElements[`${id}_plus`] = { x: plusX, y, w: btnSize, h: btnSize, action: () => { state[id]++; } };
         }
 
-        // --- EVENT HANDLING & INPUT ---
         function showInput(id, x, y, w, h) {
             activeInput = id;
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
             
             textInput.style.display = 'block';
-            textInput.style.left = `${rect.left + x / dpr}px`;
-            textInput.style.top = `${rect.top + y / dpr}px`;
-            textInput.style.width = `${w / dpr}px`;
-            textInput.style.height = `${h / dpr}px`;
-            textInput.style.fontSize = `${20 / dpr}px`;
+            textInput.style.left = `${rect.left + x}px`;
+            textInput.style.top = `${rect.top + y}px`;
+            textInput.style.width = `${w}px`;
+            textInput.style.height = `${h}px`;
+            textInput.style.fontSize = `${20}px`;
             
             textInput.value = state[id];
-            textInput.focus();
+            setTimeout(() => textInput.focus(), 0);
+            
             textInput.oninput = () => {
-                state[id] = parseInt(textInput.value) || 0;
-                draw();
+                let val = parseInt(textInput.value);
+                if (isNaN(val) || val < 0) val = 0;
+                state[id] = val;
             };
             textInput.onblur = () => {
                 textInput.style.display = 'none';
@@ -262,31 +255,31 @@
 
         function handleEvents(event) {
             const rect = canvas.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            const x = (event.clientX - rect.left) * dpr;
-            const y = (event.clientY - rect.top) * dpr;
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
             
             if (event.type === 'mousemove') {
                 mousePos = { x, y };
-                let needsRedraw = false;
                 let isHovering = false;
                 for (const key in interactiveElements) {
                     const el = interactiveElements[key];
                     if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
-                        canvas.style.cursor = 'pointer';
                         isHovering = true;
-                        needsRedraw = true; // Redraw to show hover states
                         break;
                     }
                 }
-                if (!isHovering) canvas.style.cursor = 'default';
-                if(needsRedraw) draw();
+                canvas.style.cursor = isHovering ? 'pointer' : 'default';
+                draw();
             }
 
             if (event.type === 'mousedown') {
+                if (activeInput) {
+                    textInput.blur(); // If an input is active, clicking anywhere else should hide it
+                }
                 for (const key in interactiveElements) {
                     const el = interactiveElements[key];
                     if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
+                        event.preventDefault();
                         el.action();
                         draw();
                         break;
@@ -299,9 +292,11 @@
             const container = document.getElementById('dashboard-container');
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            // No scaling ctx on this version to simplify positioning
             draw();
         }
 
@@ -312,5 +307,4 @@
     </script>
 </body>
 </html>
-
 
