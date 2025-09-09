@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Prevent scrollbars from canvas resizing */
+            overflow: hidden;
         }
         #dashboard-container {
             width: 100vw;
@@ -20,6 +20,7 @@
         }
         canvas {
             background-color: #111827; /* bg-gray-900 */
+            cursor: pointer;
         }
     </style>
 </head>
@@ -35,24 +36,31 @@
 
         // --- STATE & CONFIG ---
         let state = {
-            foundation_monthly: 0, accelerator_monthly: 0, vip_monthly: 0, pif_clients: 0,
+            foundation_monthly: 0, foundation_pif3: 0, foundation_pif6: 0,
+            accelerator_monthly: 0, accelerator_pif3: 0, accelerator_pif6: 0,
+            vip_monthly: 0, vip_pif3: 0, vip_pif6: 0,
             online_coaching: 0, livestream: 0, onlyfans: 0
         };
 
         const config = {
             prices: {
-                foundation_monthly: 520, accelerator_monthly: 720, vip_monthly: 880, pif_clients: 684,
+                foundation_monthly: 520, foundation_pif3: 520 * 3 * 0.90, foundation_pif6: 520 * 6 * 0.85,
+                accelerator_monthly: 720, accelerator_pif3: 720 * 3 * 0.90, accelerator_pif6: 720 * 6 * 0.85,
+                vip_monthly: 880, vip_pif3: 880 * 3 * 0.90, vip_pif6: 880 * 6 * 0.85,
                 online_coaching: 15, livestream: 20, onlyfans: 10
             },
             hours: {
-                foundation_monthly: 8, accelerator_monthly: 12, vip_monthly: 16, pif_clients: 12,
+                foundation_monthly: 8, foundation_pif3: 8, foundation_pif6: 8,
+                accelerator_monthly: 12, accelerator_pif3: 12, accelerator_pif6: 12,
+                vip_monthly: 16, vip_pif3: 16, vip_pif6: 16,
                 online_coaching: 10/60, livestream: 2/60, onlyfans: 1/60
             }
         };
 
-        let interactiveElements = {}; // To store clickable areas
+        let interactiveElements = {};
+        let mousePos = { x: -1, y: -1 };
 
-        // --- UTILITY FUNCTIONS ---
+        // --- UTILITY ---
         function drawRoundedRect(x, y, width, height, radius, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -72,117 +80,127 @@
         // --- DRAWING LOGIC ---
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            interactiveElements = {}; // Reset clickable areas for redraw
+            interactiveElements = {};
 
-            const isMobile = canvas.width < 1024;
-            const padding = canvas.width * 0.05;
-            let currentY = padding;
+            const isMobile = canvas.width / (window.devicePixelRatio || 1) < 1024;
+            const padding = Math.max(20, canvas.width * 0.03 / (window.devicePixelRatio || 1));
+            let currentY = padding * 1.5;
 
             // Header
-            ctx.fillStyle = '#F59E0B'; // amber-400
-            ctx.font = `900 ${isMobile ? '28px' : '40px'} Inter`;
+            ctx.fillStyle = '#F59E0B';
+            ctx.font = `900 ${isMobile ? '24px' : '36px'} Inter`;
             ctx.textAlign = 'center';
-            ctx.fillText('KAIZEN x FF // REVENUE DASHBOARD', canvas.width / 2, currentY);
-            currentY += isMobile ? 20 : 30;
-            ctx.fillStyle = '#6B7280'; // gray-500
-            ctx.font = `400 ${isMobile ? '14px' : '18px'} Inter`;
-            ctx.fillText('THE GODDAMN COMMAND CENTER', canvas.width / 2, currentY);
-            currentY += padding;
-
+            ctx.fillText('KAIZEN x FF // COMMAND CENTER', canvas.width / 2, currentY);
+            currentY += isMobile ? 30 : 50;
+            
             const mainWidth = canvas.width - (padding * 2);
             const totalsWidth = isMobile ? mainWidth : mainWidth * 0.3;
             const inputsWidth = isMobile ? mainWidth : mainWidth * 0.65;
             const startX = padding;
+            
+            let totalsHeight = drawTotals(isMobile ? startX : startX + inputsWidth + (mainWidth * 0.05), currentY, totalsWidth);
+            
             let inputsY = currentY;
-            let totalsY = currentY;
-
-            // --- Totals Column ---
-            const totalsX = isMobile ? startX : startX + inputsWidth + (mainWidth * 0.05);
-            drawTotals(totalsX, totalsY, totalsWidth);
-
-            // --- Inputs Column ---
-            const inputsStartX = isMobile ? startX : startX;
             if (isMobile) {
-               inputsY = document.getElementById('totals-container-end-y')?.value || currentY + 350; // Use stored Y pos
+                inputsY += totalsHeight + 30;
             }
-            inputsY = drawInputGroup(inputsStartX, inputsY, inputsWidth, 'KAIZEN BODY WORKS', '#F59E0B', [
+
+            let kaizenItems = [
                 { id: 'foundation_monthly', label: 'Foundation Monthly' },
+                { id: 'foundation_pif3', label: 'Foundation PIF3 (-10%)' },
+                { id: 'foundation_pif6', label: 'Foundation PIF6 (-15%)' },
                 { id: 'accelerator_monthly', label: 'Accelerator Monthly' },
+                { id: 'accelerator_pif3', label: 'Accelerator PIF3 (-10%)' },
+                { id: 'accelerator_pif6', label: 'Accelerator PIF6 (-15%)' },
                 { id: 'vip_monthly', label: 'VIP Monthly' },
-                { id: 'pif_clients', label: 'Paid-In-Full Clients' },
-            ]);
-            inputsY += 30;
-            drawInputGroup(inputsStartX, inputsY, inputsWidth, 'FUCKING FITNESS', '#EC4899', [
+                { id: 'vip_pif3', label: 'VIP PIF3 (-10%)' },
+                { id: 'vip_pif6', label: 'VIP PIF6 (-15%)' },
+            ];
+            
+            let ffItems = [
                 { id: 'online_coaching', label: 'Online Coaching Pkg' },
                 { id: 'livestream', label: 'Livestream Addon' },
                 { id: 'onlyfans', label: 'Onlyfans Sub' },
-            ]);
+            ];
+
+            inputsY = drawInputGroup(startX, inputsY, inputsWidth, 'KAIZEN BODY WORKS', '#F59E0B', kaizenItems);
+            inputsY += 30;
+            drawInputGroup(startX, inputsY, inputsWidth, 'FUCKING FITNESS', '#EC4899', ffItems);
         }
         
         function drawTotals(x, y, width) {
-            const height = 320;
-            drawRoundedRect(x, y, width, height, 16, '#1F2937'); // bg-gray-800
-            
-            let totalRevenue = 0, totalHours = 0, totalClients = 0;
+            let totalClients = 0, monthlyRevenue = 0, annualRevenue = 0, totalHours = 0;
             for(const id in state) {
                 const count = state[id];
                 totalClients += count;
-                totalRevenue += count * config.prices[id];
                 totalHours += count * config.hours[id];
-            }
-            const annualRevenue = totalRevenue * 12;
 
-            ctx.fillStyle = '#6B7280';
+                if (id.includes('_monthly') || id.startsWith('online') || id.startsWith('livestream') || id.startsWith('onlyfans')) {
+                    monthlyRevenue += count * config.prices[id];
+                    annualRevenue += count * config.prices[id] * 12;
+                } else if (id.includes('_pif3')) {
+                    monthlyRevenue += count * (config.prices[id] / 3);
+                    annualRevenue += count * config.prices[id];
+                } else if (id.includes('_pif6')) {
+                    monthlyRevenue += count * (config.prices[id] / 6);
+                    annualRevenue += count * config.prices[id];
+                }
+            }
+
+            const totalItems = 4;
+            const itemHeight = 90;
+            const headerHeight = 60;
+            const totalHeight = headerHeight + (totalItems * itemHeight);
+            
+            drawRoundedRect(x, y, width, totalHeight, 16, '#1F2937');
+
+            ctx.fillStyle = '#D1D5DB';
             ctx.font = '700 18px Inter';
             ctx.textAlign = 'center';
-            ctx.fillText('TOTALS', x + width / 2, y + 40);
-
-            drawTotalItem(x, y + 80, width, 'TOTAL CLIENTS & SUBS', totalClients.toFixed(0));
-            drawTotalItem(x, y + 140, width, 'PROJECTED MONTHLY', `$${totalRevenue.toFixed(2)}`);
-            drawTotalItem(x, y + 200, width, 'PROJECTED ANNUAL', `$${annualRevenue.toFixed(2)}`);
-            drawTotalItem(x, y + 260, width, 'VARIABLE HOURS / MO', totalHours.toFixed(1));
+            ctx.fillText('MISSION TOTALS', x + width / 2, y + 35);
             
-            // Store end Y position for mobile layout
-            const endYInput = document.createElement('input');
-            endYInput.type = 'hidden';
-            endYInput.id = 'totals-container-end-y';
-            endYInput.value = y + height + 30;
-            if (document.getElementById('totals-container-end-y')) {
-                document.getElementById('totals-container-end-y').value = endYInput.value;
-            } else {
-                document.body.appendChild(endYInput);
-            }
+            let itemY = y + headerHeight;
+            drawTotalItem(x, itemY, width, 'TOTAL ROSTER', totalClients.toFixed(0));
+            drawTotalItem(x, itemY + itemHeight, width, 'PROJECTED MONTHLY', `$${monthlyRevenue.toFixed(2)}`);
+            drawTotalItem(x, itemY + (itemHeight*2), width, 'PROJECTED ANNUAL', `$${annualRevenue.toFixed(2)}`);
+            drawTotalItem(x, itemY + (itemHeight*3), width, 'VARIABLE HOURS / MO', totalHours.toFixed(1));
+            
+            return totalHeight;
         }
         
         function drawTotalItem(x, y, width, label, value) {
             ctx.fillStyle = '#F59E0B';
             ctx.font = '600 14px Inter';
-            ctx.fillText(label, x + width/2, y);
+            ctx.fillText(label, x + width/2, y + 30);
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = '900 36px Inter';
-            ctx.fillText(value, x + width/2, y + 35);
+            ctx.font = `900 ${value.length > 8 ? '28px' : '36px'} Inter`;
+            ctx.fillText(value, x + width/2, y + 65);
         }
 
         function drawInputGroup(x, y, width, title, titleColor, items) {
-            drawRoundedRect(x, y, width, 45 + (items.length * 60), 16, '#374151'); // bg-gray-700/30
+            const rowHeight = 55;
+            const headerHeight = 50;
+            const groupHeight = headerHeight + (items.length * rowHeight);
+            drawRoundedRect(x, y, width, groupHeight, 16, '#1F2937');
             ctx.fillStyle = titleColor;
             ctx.font = '700 18px Inter';
             ctx.textAlign = 'left';
             ctx.fillText(title, x + 20, y + 30);
             
-            let itemY = y + 55;
+            let itemY = y + headerHeight;
             items.forEach(item => {
                 drawInputItem(x + 20, itemY, width - 40, item.id, item.label);
-                itemY += 60;
+                itemY += rowHeight;
             });
-            return itemY;
+            return y + groupHeight;
         }
 
         function drawInputItem(x, y, width, id, label) {
             ctx.fillStyle = '#D1D5DB';
             ctx.font = '400 14px Inter';
             ctx.textAlign = 'left';
-            ctx.fillText(label, x, y + 20);
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x, y + 16);
 
             const buttonSize = 32;
             const inputWidth = 64;
@@ -192,40 +210,60 @@
             const inputX = plusButtonX - inputWidth - 10;
             const minusButtonX = inputX - buttonSize - 10;
 
-            // Minus Button
-            drawRoundedRect(minusButtonX, buttonY, buttonSize, buttonSize, 16, '#4B5563');
+            const isHoverMinus = mousePos.x >= minusButtonX && mousePos.x <= minusButtonX + buttonSize && mousePos.y >= buttonY && mousePos.y <= buttonY + buttonSize;
+            const isHoverPlus = mousePos.x >= plusButtonX && mousePos.x <= plusButtonX + buttonSize && mousePos.y >= buttonY && mousePos.y <= buttonY + buttonSize;
+            
+            drawRoundedRect(minusButtonX, buttonY, buttonSize, buttonSize, 16, isHoverMinus ? '#F59E0B' : '#4B5563');
             ctx.fillStyle = '#FFF';
             ctx.font = '700 20px Inter';
             ctx.textAlign = 'center';
-            ctx.fillText('-', minusButtonX + buttonSize / 2, buttonY + 23);
+            ctx.fillText('-', minusButtonX + buttonSize / 2, buttonY + 18);
             interactiveElements[`${id}_minus`] = { x: minusButtonX, y: buttonY, w: buttonSize, h: buttonSize, action: () => { if(state[id] > 0) state[id]--; } };
 
-            // Number Display
-            drawRoundedRect(inputX, buttonY, inputWidth, buttonSize, 8, '#1F2937');
+            drawRoundedRect(inputX, buttonY, inputWidth, buttonSize, 8, '#111827');
             ctx.fillStyle = '#FFF';
             ctx.font = '700 18px Inter';
-            ctx.fillText(state[id], inputX + inputWidth / 2, buttonY + 22);
+            ctx.fillText(state[id], inputX + inputWidth / 2, buttonY + 17);
 
-            // Plus Button
-            drawRoundedRect(plusButtonX, buttonY, buttonSize, buttonSize, 16, '#4B5563');
+            drawRoundedRect(plusButtonX, buttonY, buttonSize, buttonSize, 16, isHoverPlus ? '#F59E0B' : '#4B5563');
             ctx.fillStyle = '#FFF';
             ctx.font = '700 20px Inter';
-            ctx.fillText('+', plusButtonX + buttonSize / 2, buttonY + 23);
+            ctx.fillText('+', plusButtonX + buttonSize / 2, buttonY + 18);
             interactiveElements[`${id}_plus`] = { x: plusButtonX, y: buttonY, w: buttonSize, h: buttonSize, action: () => { state[id]++; } };
         }
 
         // --- EVENT HANDLING & RESIZING ---
-        function handleCanvasClick(event) {
+        function handleEvents(event) {
             const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            const scaleX = canvas.width / rect.width / (window.devicePixelRatio || 1);
+            const scaleY = canvas.height / rect.height / (window.devicePixelRatio || 1);
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            if (event.type === 'mousemove') {
+                mousePos = { x, y };
+                let needsRedraw = false;
+                for (const key in interactiveElements) {
+                    const el = interactiveElements[key];
+                    if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
+                        canvas.style.cursor = 'pointer';
+                        needsRedraw = true;
+                        break;
+                    } else {
+                        canvas.style.cursor = 'default';
+                    }
+                }
+                if(needsRedraw) draw();
+            }
 
-            for (const key in interactiveElements) {
-                const el = interactiveElements[key];
-                if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
-                    el.action();
-                    draw();
-                    break;
+            if (event.type === 'mousedown') {
+                for (const key in interactiveElements) {
+                    const el = interactiveElements[key];
+                    if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
+                        el.action();
+                        draw();
+                        break;
+                    }
                 }
             }
         }
@@ -238,18 +276,16 @@
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-            
             ctx.scale(dpr, dpr);
             draw();
         }
 
         window.addEventListener('resize', resizeCanvas);
-        canvas.addEventListener('mousedown', handleCanvasClick);
+        canvas.addEventListener('mousedown', handleEvents);
+        canvas.addEventListener('mousemove', handleEvents);
 
-        // Initial draw
         resizeCanvas();
     </script>
 </body>
 </html>
+
