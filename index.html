@@ -264,8 +264,9 @@
 
         function handleEvents(event) {
             const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            const dpr = window.devicePixelRatio || 1;
+            const x = (event.clientX - rect.left) * dpr;
+            const y = (event.clientY - rect.top) * dpr;
             
             if (event.type === 'mousemove') {
                 mousePos = { x, y };
@@ -282,32 +283,31 @@
             }
 
             if (event.type === 'mousedown') {
+                // If an input is active, a click anywhere else should hide it.
                 if (activeInput) {
-                if (activeInput === id) { // Clicked on the already active input, so blur it
                     textInput.blur();
-                    return;
                 }
-                textInput.blur(); // Blur the previous input
-            }
-            setTimeout(() => { // Show new input after previous one is hidden
+
                 for (const key in interactiveElements) {
                     const el = interactiveElements[key];
                     if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
-                        if (key === `${id}_input`){
-                            el.action();
-                            break;
-                        }
+                        event.preventDefault();
+                        el.action();
+                        // No need to redraw here, the action itself will trigger it if needed.
+                        break;
                     }
                 }
-            }, 50);
+            }
         }
         
         function resizeCanvas() {
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            // No scaling ctx on this version to simplify positioning and ensure responsiveness
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            ctx.scale(dpr, dpr);
             draw();
         }
 
@@ -318,5 +318,6 @@
     </script>
 </body>
 </html>
+
 
 
