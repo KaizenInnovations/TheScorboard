@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAIZEN x FF - Canvas Command Center</title>
+    <title>KAIZEN x FF - Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
             overflow: hidden;
         }
         #dashboard-container {
@@ -17,10 +19,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         canvas {
-            background-color: #111827; /* bg-gray-900 */
-            cursor: pointer;
+            background-color: #111827;
+            cursor: default;
+        }
+        /* Hidden input field for typing on the canvas */
+        #canvas-input {
+            position: absolute;
+            display: none;
+            background: transparent;
+            border: 1px solid #F59E0B; /* Amber for visibility */
+            color: white;
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 900;
+            outline: none;
+            border-radius: 8px;
+            padding: 0;
+            -moz-appearance: textfield;
+        }
+        #canvas-input::-webkit-outer-spin-button,
+        #canvas-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
     </style>
 </head>
@@ -28,11 +51,13 @@
 
     <div id="dashboard-container">
         <canvas id="dashboardCanvas"></canvas>
+        <input type="number" id="canvas-input" />
     </div>
 
     <script>
         const canvas = document.getElementById('dashboardCanvas');
         const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('canvas-input');
 
         // --- STATE & CONFIG ---
         let state = {
@@ -43,6 +68,7 @@
         };
 
         const config = {
+            colors: { kaizen: '#00BF63', ff: '#FF69B4', accent: '#F59E0B', text: '#E5E7EB', textMuted: '#9CA3AF' },
             prices: {
                 foundation_monthly: 520, foundation_pif3: 520 * 3 * 0.90, foundation_pif6: 520 * 6 * 0.85,
                 accelerator_monthly: 720, accelerator_pif3: 720 * 3 * 0.90, accelerator_pif6: 720 * 6 * 0.85,
@@ -59,25 +85,21 @@
 
         let interactiveElements = {};
         let mousePos = { x: -1, y: -1 };
+        let activeInput = null;
 
         // --- UTILITY ---
-        function drawRoundedRect(x, y, width, height, radius, color) {
+        function drawRoundedRect(x, y, w, h, r, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
             ctx.closePath();
             ctx.fill();
         }
 
-        // --- DRAWING LOGIC ---
+        // --- DRAWING ---
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             interactiveElements = {};
@@ -87,11 +109,11 @@
             let currentY = padding * 1.5;
 
             // Header
-            ctx.fillStyle = '#F59E0B';
-            ctx.font = `900 ${isMobile ? '24px' : '36px'} Inter`;
+            ctx.fillStyle = config.colors.accent;
+            ctx.font = `400 ${isMobile ? '28px' : '40px'} Anton`;
             ctx.textAlign = 'center';
             ctx.fillText('KAIZEN x FF // COMMAND CENTER', canvas.width / 2, currentY);
-            currentY += isMobile ? 30 : 50;
+            currentY += isMobile ? 40 : 60;
             
             const mainWidth = canvas.width - (padding * 2);
             const totalsWidth = isMobile ? mainWidth : mainWidth * 0.3;
@@ -99,160 +121,164 @@
             const startX = padding;
             
             let totalsHeight = drawTotals(isMobile ? startX : startX + inputsWidth + (mainWidth * 0.05), currentY, totalsWidth);
-            
             let inputsY = currentY;
-            if (isMobile) {
-                inputsY += totalsHeight + 30;
-            }
+            if (isMobile) inputsY += totalsHeight + 30;
 
-            let kaizenItems = [
-                { id: 'foundation_monthly', label: 'Foundation Monthly' },
-                { id: 'foundation_pif3', label: 'Foundation PIF3 (-10%)' },
-                { id: 'foundation_pif6', label: 'Foundation PIF6 (-15%)' },
-                { id: 'accelerator_monthly', label: 'Accelerator Monthly' },
-                { id: 'accelerator_pif3', label: 'Accelerator PIF3 (-10%)' },
-                { id: 'accelerator_pif6', label: 'Accelerator PIF6 (-15%)' },
-                { id: 'vip_monthly', label: 'VIP Monthly' },
-                { id: 'vip_pif3', label: 'VIP PIF3 (-10%)' },
-                { id: 'vip_pif6', label: 'VIP PIF6 (-15%)' },
-            ];
+            const cardWidth = isMobile ? inputsWidth : (inputsWidth - 20) / 3;
             
-            let ffItems = [
+            // Kaizen Cards
+            let cardX = startX;
+            drawKaizenCard(cardX, inputsY, cardWidth, 'FOUNDATION', 'foundation');
+            cardX += cardWidth + 10;
+            drawKaizenCard(cardX, inputsY, cardWidth, 'ACCELERATOR', 'accelerator');
+            cardX += cardWidth + 10;
+            drawKaizenCard(cardX, inputsY, cardWidth, 'VIP', 'vip');
+            
+            inputsY += 280; // Height of Kaizen cards
+
+            // FF Group
+            drawInputGroup(startX, inputsY, inputsWidth, 'FUCKING FITNESS', config.colors.ff, [
                 { id: 'online_coaching', label: 'Online Coaching Pkg' },
                 { id: 'livestream', label: 'Livestream Addon' },
                 { id: 'onlyfans', label: 'Onlyfans Sub' },
-            ];
-
-            inputsY = drawInputGroup(startX, inputsY, inputsWidth, 'KAIZEN BODY WORKS', '#F59E0B', kaizenItems);
-            inputsY += 30;
-            drawInputGroup(startX, inputsY, inputsWidth, 'FUCKING FITNESS', '#EC4899', ffItems);
+            ]);
         }
-        
-        function drawTotals(x, y, width) {
+
+        function drawTotals(x, y, w) {
             let totalClients = 0, monthlyRevenue = 0, annualRevenue = 0, totalHours = 0;
             for(const id in state) {
-                const count = state[id];
-                totalClients += count;
-                totalHours += count * config.hours[id];
-
-                if (id.includes('_monthly') || id.startsWith('online') || id.startsWith('livestream') || id.startsWith('onlyfans')) {
-                    monthlyRevenue += count * config.prices[id];
-                    annualRevenue += count * config.prices[id] * 12;
+                const count = state[id]; totalClients += count; totalHours += count * config.hours[id];
+                if (id.includes('_monthly') || id.includes('online') || id.includes('livestream') || id.includes('onlyfans')) {
+                    monthlyRevenue += count * config.prices[id]; annualRevenue += count * config.prices[id] * 12;
                 } else if (id.includes('_pif3')) {
-                    monthlyRevenue += count * (config.prices[id] / 3);
-                    annualRevenue += count * config.prices[id];
+                    monthlyRevenue += count * (config.prices[id] / 3); annualRevenue += count * config.prices[id];
                 } else if (id.includes('_pif6')) {
-                    monthlyRevenue += count * (config.prices[id] / 6);
-                    annualRevenue += count * config.prices[id];
+                    monthlyRevenue += count * (config.prices[id] / 6); annualRevenue += count * config.prices[id];
                 }
             }
-
-            const totalItems = 4;
-            const itemHeight = 90;
-            const headerHeight = 60;
-            const totalHeight = headerHeight + (totalItems * itemHeight);
-            
-            drawRoundedRect(x, y, width, totalHeight, 16, '#1F2937');
-
-            ctx.fillStyle = '#D1D5DB';
-            ctx.font = '700 18px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText('MISSION TOTALS', x + width / 2, y + 35);
-            
+            const itemHeight = 90, headerHeight = 60, totalHeight = headerHeight + (4 * itemHeight);
+            drawRoundedRect(x, y, w, totalHeight, 16, '#1F2937');
+            ctx.fillStyle = config.colors.text; ctx.font = '700 18px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText('MISSION TOTALS', x + w / 2, y + 35);
             let itemY = y + headerHeight;
-            drawTotalItem(x, itemY, width, 'TOTAL ROSTER', totalClients.toFixed(0));
-            drawTotalItem(x, itemY + itemHeight, width, 'PROJECTED MONTHLY', `$${monthlyRevenue.toFixed(2)}`);
-            drawTotalItem(x, itemY + (itemHeight*2), width, 'PROJECTED ANNUAL', `$${annualRevenue.toFixed(2)}`);
-            drawTotalItem(x, itemY + (itemHeight*3), width, 'VARIABLE HOURS / MO', totalHours.toFixed(1));
-            
+            drawTotalItem(x, itemY, w, 'TOTAL ROSTER', totalClients.toFixed(0));
+            drawTotalItem(x, itemY + itemHeight, w, 'PROJECTED MONTHLY', `$${monthlyRevenue.toFixed(2)}`);
+            drawTotalItem(x, itemY + itemHeight*2, w, 'PROJECTED ANNUAL', `$${annualRevenue.toFixed(2)}`);
+            drawTotalItem(x, itemY + itemHeight*3, w, 'VARIABLE HOURS / MO', totalHours.toFixed(1));
             return totalHeight;
         }
         
-        function drawTotalItem(x, y, width, label, value) {
-            ctx.fillStyle = '#F59E0B';
-            ctx.font = '600 14px Inter';
-            ctx.fillText(label, x + width/2, y + 30);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = `900 ${value.length > 8 ? '28px' : '36px'} Inter`;
-            ctx.fillText(value, x + width/2, y + 65);
+        function drawTotalItem(x, y, w, label, value) {
+            ctx.fillStyle = config.colors.accent; ctx.font = '700 14px Roboto';
+            ctx.fillText(label, x + w/2, y + 30);
+            ctx.fillStyle = '#FFFFFF'; ctx.font = `900 ${value.length > 8 ? '28px' : '36px'} Roboto`;
+            ctx.fillText(value, x + w/2, y + 65);
         }
 
-        function drawInputGroup(x, y, width, title, titleColor, items) {
-            const rowHeight = 55;
-            const headerHeight = 50;
-            const groupHeight = headerHeight + (items.length * rowHeight);
-            drawRoundedRect(x, y, width, groupHeight, 16, '#1F2937');
-            ctx.fillStyle = titleColor;
-            ctx.font = '700 18px Inter';
-            ctx.textAlign = 'left';
-            ctx.fillText(title, x + 20, y + 30);
-            
-            let itemY = y + headerHeight;
+        function drawKaizenCard(x, y, w, title, baseId) {
+            const h = 250;
+            drawRoundedRect(x, y, w, h, 16, '#1F2937');
+            ctx.fillStyle = config.colors.kaizen; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText(title, x + w / 2, y + 30);
+            drawInputItem(x + 15, y + 60, w - 30, `${baseId}_monthly`, 'Monthly');
+            drawInputItem(x + 15, y + 120, w - 30, `${baseId}_pif3`, 'PIF 3-Mo');
+            drawInputItem(x + 15, y + 180, w - 30, `${baseId}_pif6`, 'PIF 6-Mo');
+        }
+        
+        function drawInputGroup(x, y, w, title, color, items) {
+            const h = 60 + (items.length * 60);
+            drawRoundedRect(x, y, w, h, 16, '#1F2937');
+            ctx.fillStyle = color; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText(title, x + w / 2, y + 35);
+            let itemY = y + 60;
             items.forEach(item => {
-                drawInputItem(x + 20, itemY, width - 40, item.id, item.label);
-                itemY += rowHeight;
+                drawInputItem(x + 15, itemY, w - 30, item.id, item.label);
+                itemY += 60;
             });
-            return y + groupHeight;
         }
 
-        function drawInputItem(x, y, width, id, label) {
-            ctx.fillStyle = '#D1D5DB';
-            ctx.font = '400 14px Inter';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
+        function drawInputItem(x, y, w, id, label) {
+            ctx.fillStyle = config.colors.textMuted; ctx.font = '400 14px Roboto';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
             ctx.fillText(label, x, y + 16);
 
-            const buttonSize = 32;
-            const inputWidth = 64;
-            const buttonY = y;
+            const btnSize = 32, inputW = 64, inputH = 32;
+            const plusX = x + w - btnSize;
+            const numX = plusX - inputW - 10;
+            const minusX = numX - btnSize - 10;
 
-            const plusButtonX = x + width - buttonSize;
-            const inputX = plusButtonX - inputWidth - 10;
-            const minusButtonX = inputX - buttonSize - 10;
-
-            const isHoverMinus = mousePos.x >= minusButtonX && mousePos.x <= minusButtonX + buttonSize && mousePos.y >= buttonY && mousePos.y <= buttonY + buttonSize;
-            const isHoverPlus = mousePos.x >= plusButtonX && mousePos.x <= plusButtonX + buttonSize && mousePos.y >= buttonY && mousePos.y <= buttonY + buttonSize;
+            const isHoverMinus = mousePos.x >= minusX && mousePos.x <= minusX + btnSize && mousePos.y >= y && mousePos.y <= y + btnSize;
+            const isHoverPlus = mousePos.x >= plusX && mousePos.x <= plusX + btnSize && mousePos.y >= y && mousePos.y <= y + btnSize;
+            const isHoverNum = mousePos.x >= numX && mousePos.x <= numX + inputW && mousePos.y >= y && mousePos.y <= y + inputH;
             
-            drawRoundedRect(minusButtonX, buttonY, buttonSize, buttonSize, 16, isHoverMinus ? '#F59E0B' : '#4B5563');
-            ctx.fillStyle = '#FFF';
-            ctx.font = '700 20px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText('-', minusButtonX + buttonSize / 2, buttonY + 18);
-            interactiveElements[`${id}_minus`] = { x: minusButtonX, y: buttonY, w: buttonSize, h: buttonSize, action: () => { if(state[id] > 0) state[id]--; } };
+            // Minus Button
+            drawRoundedRect(minusX, y, btnSize, btnSize, 16, isHoverMinus ? config.colors.accent : '#4B5563');
+            ctx.fillStyle = '#FFF'; ctx.font = '700 20px Roboto'; ctx.textAlign = 'center';
+            ctx.fillText('-', minusX + btnSize / 2, y + 18);
+            interactiveElements[`${id}_minus`] = { x: minusX, y, w: btnSize, h: btnSize, action: () => { if(state[id] > 0) state[id]--; } };
 
-            drawRoundedRect(inputX, buttonY, inputWidth, buttonSize, 8, '#111827');
-            ctx.fillStyle = '#FFF';
-            ctx.font = '700 18px Inter';
-            ctx.fillText(state[id], inputX + inputWidth / 2, buttonY + 17);
-
-            drawRoundedRect(plusButtonX, buttonY, buttonSize, buttonSize, 16, isHoverPlus ? '#F59E0B' : '#4B5563');
-            ctx.fillStyle = '#FFF';
-            ctx.font = '700 20px Inter';
-            ctx.fillText('+', plusButtonX + buttonSize / 2, buttonY + 18);
-            interactiveElements[`${id}_plus`] = { x: plusButtonX, y: buttonY, w: buttonSize, h: buttonSize, action: () => { state[id]++; } };
+            // Number Display / Input Area
+            if (activeInput !== id) {
+                drawRoundedRect(numX, y, inputW, inputH, 8, isHoverNum ? '#374151' : '#111827');
+                ctx.fillStyle = '#FFF'; ctx.font = '900 18px Roboto';
+                ctx.fillText(state[id], numX + inputW / 2, y + 17);
+            }
+            interactiveElements[`${id}_input`] = { x: numX, y, w: inputW, h: inputH, action: () => showInput(id, numX, y, inputW, inputH) };
+            
+            // Plus Button
+            drawRoundedRect(plusX, y, btnSize, btnSize, 16, isHoverPlus ? config.colors.accent : '#4B5563');
+            ctx.fillStyle = '#FFF'; ctx.font = '700 20px Roboto';
+            ctx.fillText('+', plusX + btnSize / 2, y + 18);
+            interactiveElements[`${id}_plus`] = { x: plusX, y, w: btnSize, h: btnSize, action: () => { state[id]++; } };
         }
 
-        // --- EVENT HANDLING & RESIZING ---
+        // --- EVENT HANDLING & INPUT ---
+        function showInput(id, x, y, w, h) {
+            activeInput = id;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            textInput.style.display = 'block';
+            textInput.style.left = `${rect.left + x / dpr}px`;
+            textInput.style.top = `${rect.top + y / dpr}px`;
+            textInput.style.width = `${w / dpr}px`;
+            textInput.style.height = `${h / dpr}px`;
+            textInput.style.fontSize = `${18 / dpr}px`;
+            
+            textInput.value = state[id];
+            textInput.focus();
+            textInput.oninput = () => {
+                state[id] = parseInt(textInput.value) || 0;
+                draw();
+            };
+            textInput.onblur = () => {
+                textInput.style.display = 'none';
+                activeInput = null;
+                draw();
+            };
+            draw();
+        }
+
         function handleEvents(event) {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width / (window.devicePixelRatio || 1);
-            const scaleY = canvas.height / rect.height / (window.devicePixelRatio || 1);
-            const x = (event.clientX - rect.left) * scaleX;
-            const y = (event.clientY - rect.top) * scaleY;
+            const dpr = window.devicePixelRatio || 1;
+            const x = (event.clientX - rect.left) * dpr;
+            const y = (event.clientY - rect.top) * dpr;
             
             if (event.type === 'mousemove') {
                 mousePos = { x, y };
                 let needsRedraw = false;
+                let isHovering = false;
                 for (const key in interactiveElements) {
                     const el = interactiveElements[key];
                     if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
                         canvas.style.cursor = 'pointer';
-                        needsRedraw = true;
+                        isHovering = true;
+                        needsRedraw = true; // Redraw to show hover states
                         break;
-                    } else {
-                        canvas.style.cursor = 'default';
                     }
                 }
+                if (!isHovering) canvas.style.cursor = 'default';
                 if(needsRedraw) draw();
             }
 
@@ -272,10 +298,8 @@
             const container = document.getElementById('dashboard-container');
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
-            
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
-            
             ctx.scale(dpr, dpr);
             draw();
         }
@@ -283,7 +307,6 @@
         window.addEventListener('resize', resizeCanvas);
         canvas.addEventListener('mousedown', handleEvents);
         canvas.addEventListener('mousemove', handleEvents);
-
         resizeCanvas();
     </script>
 </body>
