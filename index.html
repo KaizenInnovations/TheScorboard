@@ -283,28 +283,31 @@
 
             if (event.type === 'mousedown') {
                 if (activeInput) {
+                if (activeInput === id) { // Clicked on the already active input, so blur it
                     textInput.blur();
                     return;
                 }
+                textInput.blur(); // Blur the previous input
+            }
+            setTimeout(() => { // Show new input after previous one is hidden
                 for (const key in interactiveElements) {
                     const el = interactiveElements[key];
                     if (x >= el.x && x <= el.x + el.w && y >= el.y && y <= el.y + el.h) {
-                        event.preventDefault();
-                        el.action();
-                        break;
+                        if (key === `${id}_input`){
+                            el.action();
+                            break;
+                        }
                     }
                 }
-            }
+            }, 50);
         }
         
         function resizeCanvas() {
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-            ctx.scale(dpr, dpr);
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            // No scaling ctx on this version to simplify positioning and ensure responsiveness
             draw();
         }
 
@@ -315,4 +318,5 @@
     </script>
 </body>
 </html>
+
 
