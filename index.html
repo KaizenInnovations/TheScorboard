@@ -3,264 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revenue Command Center</title>
+    <title>Kaizen Body Works & Fucking Fitness - Revenue Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ff-pink': '#FF69B4',
+                        'kbw-green': '#00bf63'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #1A1A1A; /* Dark Charcoal */
-        }
-        /* Custom styling for number inputs */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        .total-card {
-            background: linear-gradient(135deg, #2D2D2D, #1E1E1E);
-        }
-        .kaizen-card {
-            border-left: 5px solid #00BF63;
-        }
-        .ff-card {
-            border-left: 5px solid #FF69B4;
-        }
-        .control-button {
-            transition: all 0.2s ease-in-out;
-        }
-        .control-button:active {
-            transform: scale(0.95);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #FF69B4 0%, #00bf63 100%); }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+        .card-shadow { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
-<body class="text-gray-200">
-
-    <div class="max-w-7xl mx-auto p-4 md:p-8">
-        
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-4xl md:text-5xl font-black tracking-tight" style="color: #FADADD;">Revenue Command Center</h1>
-            <p class="text-lg text-gray-400 mt-2">Your Business, At a Glance.</p>
-        </header>
-
-        <!-- Totals Section -->
-        <div class="sticky top-0 z-10 py-4 bg-[#1A1A1A]/80 backdrop-blur-sm mb-8 md:mb-12">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="total-card p-4 rounded-2xl shadow-lg text-center">
-                    <p class="text-sm md:text-base font-bold text-gray-400">Total Roster</p>
-                    <p id="total-clients" class="text-2xl md:text-4xl font-black" style="color: #FADADD;">0</p>
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Revenue Calculator</h1>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-kbw-green rounded-full"></div>
+                    <span class="text-white font-semibold">Kaizen Body Works</span>
                 </div>
-                <div class="total-card p-4 rounded-2xl shadow-lg text-center">
-                    <p class="text-sm md:text-base font-bold text-gray-400">Monthly Revenue</p>
-                    <p id="total-monthly" class="text-2xl md:text-4xl font-black" style="color: #FADADD;">$0.00</p>
-                </div>
-                <div class="total-card p-4 rounded-2xl shadow-lg text-center col-span-2 lg:col-span-1">
-                    <p class="text-sm md:text-base font-bold text-gray-400">Annual Revenue</p>
-                    <p id="total-annual" class="text-2xl md:text-4xl font-black" style="color: #FADADD;">$0.00</p>
-                </div>
-                <div class="total-card p-4 rounded-2xl shadow-lg text-center col-span-2 lg:col-span-1">
-                    <p class="text-sm md:text-base font-bold text-gray-400">Total Hours / Mo</p>
-                    <p id="total-hours" class="text-2xl md:text-4xl font-black" style="color: #FADADD;">0</p>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-ff-pink rounded-full"></div>
+                    <span class="text-white font-semibold">Fucking Fitness</span>
                 </div>
             </div>
         </div>
 
-        <!-- Packages Section -->
-        <main class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <!-- Calculator Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Personal Training Packages -->
+            <div class="glass-effect rounded-2xl p-6 card-shadow">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Personal Training Packages</h2>
+                
+                <!-- Tier 1 -->
+                <div class="bg-white/20 rounded-xl p-4 mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">Tier 1 - $520/month</h3>
+                        <span class="text-sm text-white/80">2 hours/week</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">Monthly Clients</label>
+                            <input type="number" id="tier1-monthly" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">3-Month PIF (-10%)</label>
+                            <input type="number" id="tier1-3month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">6-Month PIF (-15%)</label>
+                            <input type="number" id="tier1-6month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Kaizen Packages -->
-            <div class="md:col-span-2 xl:col-span-3">
-                 <h2 class="text-2xl font-bold mb-4 pb-2 border-b-2" style="border-color: #00BF63;">
-                    <span style="color: #00BF63;">●</span> Kaizen Body Works
-                </h2>
+                <!-- Tier 2 -->
+                <div class="bg-white/20 rounded-xl p-4 mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">Tier 2 - $720/month</h3>
+                        <span class="text-sm text-white/80">3 hours/week</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">Monthly Clients</label>
+                            <input type="number" id="tier2-monthly" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">3-Month PIF (-10%)</label>
+                            <input type="number" id="tier2-3month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">6-Month PIF (-15%)</label>
+                            <input type="number" id="tier2-6month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="bg-white/20 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">Tier 3 - $880/month</h3>
+                        <span class="text-sm text-white/80">4 hours/week</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">Monthly Clients</label>
+                            <input type="number" id="tier3-monthly" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">3-Month PIF (-10%)</label>
+                            <input type="number" id="tier3-3month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-white/80 text-xs mb-1">6-Month PIF (-15%)</label>
+                            <input type="number" id="tier3-6month" min="0" value="0" class="w-full px-2 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Digital Services -->
+            <div class="glass-effect rounded-2xl p-6 card-shadow">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Digital Services</h2>
+                
+                <!-- Online Training -->
+                <div class="bg-white/20 rounded-xl p-4 mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">Online Training - $15/month</h3>
+                        <span class="text-sm text-white/80">10 min/month</span>
+                    </div>
+                    <div>
+                        <label class="block text-white/80 text-sm mb-1">Clients</label>
+                        <input type="number" id="online-clients" min="0" value="0" class="w-full px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- OnlyFans -->
+                <div class="bg-white/20 rounded-xl p-4 mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">OnlyFans - $10/month</h3>
+                        <span class="text-sm text-white/80">4 hours/week</span>
+                    </div>
+                    <div>
+                        <label class="block text-white/80 text-sm mb-1">Subscribers</label>
+                        <input type="number" id="onlyfans-clients" min="0" value="0" class="w-full px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Livestream -->
+                <div class="bg-white/20 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-white">Livestream - $20/month</h3>
+                        <span class="text-sm text-white/80">1 hour/week total</span>
+                    </div>
+                    <div>
+                        <label class="block text-white/80 text-sm mb-1">Subscribers</label>
+                        <input type="number" id="livestream-subscribers" min="0" value="0" class="w-full px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white focus:outline-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Revenue Dashboard</h2>
             
-            <!-- Foundation Package -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl kaizen-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">Foundation Package</h3>
-                <div data-package="foundation_monthly" class="package-item"></div>
-                <div data-package="foundation_pif3" class="package-item"></div>
-                <div data-package="foundation_pif6" class="package-item"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Monthly Revenue -->
+                <div class="bg-kbw-green/20 rounded-xl p-4 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">Monthly Revenue</h3>
+                    <p class="text-3xl font-bold text-white" id="monthly-revenue">$0</p>
+                </div>
+                
+                <!-- Annual Revenue -->
+                <div class="bg-ff-pink/20 rounded-xl p-4 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">Annual Revenue</h3>
+                    <p class="text-3xl font-bold text-white" id="annual-revenue">$0</p>
+                </div>
+                
+                <!-- Monthly Hours -->
+                <div class="bg-white/20 rounded-xl p-4 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">Monthly Hours</h3>
+                    <p class="text-3xl font-bold text-white" id="monthly-hours">0</p>
+                </div>
+                
+                <!-- Hourly Rate -->
+                <div class="bg-white/20 rounded-xl p-4 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">Avg Hourly Rate</h3>
+                    <p class="text-3xl font-bold text-white" id="hourly-rate">$0</p>
+                </div>
             </div>
 
-            <!-- Accelerator Package -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl kaizen-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">Accelerator Package</h3>
-                <div data-package="accelerator_monthly" class="package-item"></div>
-                <div data-package="accelerator_pif3" class="package-item"></div>
-                <div data-package="accelerator_pif6" class="package-item"></div>
+            <!-- Detailed Breakdown -->
+            <div class="bg-white/10 rounded-xl p-4">
+                <h3 class="text-xl font-semibold text-white mb-4">Breakdown by Service</h3>
+                <div id="breakdown" class="space-y-2"></div>
             </div>
-
-            <!-- VIP Package -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl kaizen-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">VIP Package</h3>
-                <div data-package="vip_monthly" class="package-item"></div>
-                <div data-package="vip_pif3" class="package-item"></div>
-                <div data-package="vip_pif6" class="package-item"></div>
-            </div>
-
-             <!-- Fucking Fitness Packages -->
-            <div class="md:col-span-2 xl:col-span-3 mt-8">
-                 <h2 class="text-2xl font-bold mb-4 pb-2 border-b-2" style="border-color: #FF69B4;">
-                    <span style="color: #FF69B4;">●</span> Fucking Fitness
-                </h2>
-            </div>
-            
-            <!-- Online Package -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl ff-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">Online Package</h3>
-                <div data-package="online_coaching" class="package-item"></div>
-            </div>
-
-             <!-- Video Addon -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl ff-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">Video Addon</h3>
-                <div data-package="video_addon" class="package-item"></div>
-            </div>
-
-             <!-- OnlyFans Sub -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl ff-card space-y-4">
-                <h3 class="text-xl font-bold text-gray-100">OnlyFans Sub</h3>
-                <div data-package="onlyfans" class="package-item"></div>
-            </div>
-
-        </main>
-
+        </div>
     </div>
 
     <script>
-        const packageData = {
-            // Kaizen
-            foundation_monthly: { name: 'Monthly', price: 520, hours: 8, type: 'monthly' },
-            foundation_pif3: { name: 'PIF 3-Month (-10%)', price: 520 * 3 * 0.9, hours: 8 * 3, type: 'pif3' },
-            foundation_pif6: { name: 'PIF 6-Month (-15%)', price: 520 * 6 * 0.85, hours: 8 * 6, type: 'pif6' },
-            accelerator_monthly: { name: 'Monthly', price: 720, hours: 12, type: 'monthly' },
-            accelerator_pif3: { name: 'PIF 3-Month (-10%)', price: 720 * 3 * 0.9, hours: 12 * 3, type: 'pif3' },
-            accelerator_pif6: { name: 'PIF 6-Month (-15%)', price: 720 * 6 * 0.85, hours: 12 * 6, type: 'pif6' },
-            vip_monthly: { name: 'Monthly', price: 880, hours: 16, type: 'monthly' },
-            vip_pif3: { name: 'PIF 3-Month (-10%)', price: 880 * 3 * 0.9, hours: 16 * 3, type: 'pif3' },
-            vip_pif6: { name: 'PIF 6-Month (-15%)', price: 880 * 6 * 0.85, hours: 16 * 6, type: 'pif6' },
-            // FF
-            online_coaching: { name: 'Subscribers', price: 15, hours: 10 / 60, type: 'monthly' },
-            video_addon: { name: 'Subscribers', price: 20, hours: 0, type: 'monthly', fixedHours: 5 },
-            onlyfans: { name: 'Subscribers', price: 10, hours: 0, type: 'monthly', fixedHours: 5 },
-        };
+        function calculateRevenue() {
+            let monthlyRevenue = 0;
+            let monthlyHours = 0;
+            let breakdown = [];
 
-        const state = {};
-
-        function renderPackageItems() {
-            const packageItems = document.querySelectorAll('.package-item');
-            packageItems.forEach(item => {
-                const packageId = item.dataset.package;
-                if (!packageData[packageId]) return;
-
-                const data = packageData[packageId];
-                state[packageId] = 0; // Initialize state
-
-                item.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <p class="text-gray-300">${data.name}</p>
-                        <div class="flex items-center space-x-2">
-                            <button class="control-button minus-btn w-10 h-10 rounded-full bg-gray-700 hover:bg-red-500 text-2xl font-bold text-white" data-id="${packageId}">-</button>
-                            <input type="number" value="0" min="0" class="client-input w-16 h-10 text-center text-lg font-bold bg-gray-900 text-white rounded-lg border-2 border-gray-600 focus:border-pink-500 focus:ring-0" data-id="${packageId}">
-                            <button class="control-button plus-btn w-10 h-10 rounded-full bg-gray-700 hover:bg-green-500 text-2xl font-bold text-white" data-id="${packageId}">+</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function calculateTotals() {
-            let totalClients = 0;
-            let totalMonthly = 0;
-            let totalAnnual = 0;
-            let totalHours = 0;
-
-            let hasVideoAddon = false;
-            let hasOnlyFans = false;
-
-            for (const id in state) {
-                const count = state[id];
-                const data = packageData[id];
-
-                totalClients += count;
-                
-                if (data.type === 'monthly') {
-                    totalMonthly += count * data.price;
-                    totalAnnual += count * data.price * 12;
-                    totalHours += count * data.hours;
-                } else if (data.type === 'pif3') {
-                    totalMonthly += count * (data.price / 3);
-                    totalAnnual += count * data.price;
-                    totalHours += count * (data.hours / 3);
-                } else if (data.type === 'pif6') {
-                    totalMonthly += count * (data.price / 6);
-                    totalAnnual += count * data.price;
-                    totalHours += count * (data.hours / 6);
-                }
-
-                if(id === 'video_addon' && count > 0) hasVideoAddon = true;
-                if(id === 'onlyfans' && count > 0) hasOnlyFans = true;
-            }
+            // Tier 1 calculations
+            const tier1Monthly = parseInt(document.getElementById('tier1-monthly').value) || 0;
+            const tier1_3month = parseInt(document.getElementById('tier1-3month').value) || 0;
+            const tier1_6month = parseInt(document.getElementById('tier1-6month').value) || 0;
             
-            if(hasVideoAddon) totalHours += 5;
-            if(hasOnlyFans) totalHours += 5;
+            if (tier1Monthly > 0 || tier1_3month > 0 || tier1_6month > 0) {
+                const tier1Rate = 520;
+                const tier1MonthlyRevenue = tier1Monthly * tier1Rate;
+                const tier1_3monthRevenue = tier1_3month * (tier1Rate * 3 * 0.9) / 12; // 3 months upfront, amortized monthly
+                const tier1_6monthRevenue = tier1_6month * (tier1Rate * 6 * 0.85) / 12; // 6 months upfront, amortized monthly
+                const tier1TotalRevenue = tier1MonthlyRevenue + tier1_3monthRevenue + tier1_6monthRevenue;
+                
+                const tier1TotalClients = tier1Monthly + tier1_3month + tier1_6month;
+                const tier1Hours = tier1TotalClients * 2 * 4; // 2 hours/week * 4 weeks/month
+                
+                monthlyRevenue += tier1TotalRevenue;
+                monthlyHours += tier1Hours;
+                
+                let tier1Details = [];
+                if (tier1Monthly > 0) tier1Details.push(`${tier1Monthly} monthly ($${tier1MonthlyRevenue})`);
+                if (tier1_3month > 0) tier1Details.push(`${tier1_3month} 3-mo PIF ($${tier1_3monthRevenue.toFixed(0)})`);
+                if (tier1_6month > 0) tier1Details.push(`${tier1_6month} 6-mo PIF ($${tier1_6monthRevenue.toFixed(0)})`);
+                breakdown.push(`Tier 1: ${tier1Details.join(', ')} = $${tier1TotalRevenue.toFixed(0)} (${tier1Hours.toFixed(1)} hours)`);
+            }
 
+            // Tier 2 calculations
+            const tier2Monthly = parseInt(document.getElementById('tier2-monthly').value) || 0;
+            const tier2_3month = parseInt(document.getElementById('tier2-3month').value) || 0;
+            const tier2_6month = parseInt(document.getElementById('tier2-6month').value) || 0;
+            
+            if (tier2Monthly > 0 || tier2_3month > 0 || tier2_6month > 0) {
+                const tier2Rate = 720;
+                const tier2MonthlyRevenue = tier2Monthly * tier2Rate;
+                const tier2_3monthRevenue = tier2_3month * (tier2Rate * 3 * 0.9) / 12; // 3 months upfront, amortized monthly
+                const tier2_6monthRevenue = tier2_6month * (tier2Rate * 6 * 0.85) / 12; // 6 months upfront, amortized monthly
+                const tier2TotalRevenue = tier2MonthlyRevenue + tier2_3monthRevenue + tier2_6monthRevenue;
+                
+                const tier2TotalClients = tier2Monthly + tier2_3month + tier2_6month;
+                const tier2Hours = tier2TotalClients * 3 * 4;
+                
+                monthlyRevenue += tier2TotalRevenue;
+                monthlyHours += tier2Hours;
+                
+                let tier2Details = [];
+                if (tier2Monthly > 0) tier2Details.push(`${tier2Monthly} monthly ($${tier2MonthlyRevenue})`);
+                if (tier2_3month > 0) tier2Details.push(`${tier2_3month} 3-mo PIF ($${tier2_3monthRevenue.toFixed(0)})`);
+                if (tier2_6month > 0) tier2Details.push(`${tier2_6month} 6-mo PIF ($${tier2_6monthRevenue.toFixed(0)})`);
+                breakdown.push(`Tier 2: ${tier2Details.join(', ')} = $${tier2TotalRevenue.toFixed(0)} (${tier2Hours.toFixed(1)} hours)`);
+            }
 
-            document.getElementById('total-clients').textContent = totalClients;
-            document.getElementById('total-monthly').textContent = `$${totalMonthly.toFixed(2)}`;
-            document.getElementById('total-annual').textContent = `$${totalAnnual.toFixed(2)}`;
-            document.getElementById('total-hours').textContent = totalHours.toFixed(1);
+            // Tier 3 calculations
+            const tier3Monthly = parseInt(document.getElementById('tier3-monthly').value) || 0;
+            const tier3_3month = parseInt(document.getElementById('tier3-3month').value) || 0;
+            const tier3_6month = parseInt(document.getElementById('tier3-6month').value) || 0;
+            
+            if (tier3Monthly > 0 || tier3_3month > 0 || tier3_6month > 0) {
+                const tier3Rate = 880;
+                const tier3MonthlyRevenue = tier3Monthly * tier3Rate;
+                const tier3_3monthRevenue = tier3_3month * (tier3Rate * 3 * 0.9) / 12; // 3 months upfront, amortized monthly
+                const tier3_6monthRevenue = tier3_6month * (tier3Rate * 6 * 0.85) / 12; // 6 months upfront, amortized monthly
+                const tier3TotalRevenue = tier3MonthlyRevenue + tier3_3monthRevenue + tier3_6monthRevenue;
+                
+                const tier3TotalClients = tier3Monthly + tier3_3month + tier3_6month;
+                const tier3Hours = tier3TotalClients * 4 * 4;
+                
+                monthlyRevenue += tier3TotalRevenue;
+                monthlyHours += tier3Hours;
+                
+                let tier3Details = [];
+                if (tier3Monthly > 0) tier3Details.push(`${tier3Monthly} monthly ($${tier3MonthlyRevenue})`);
+                if (tier3_3month > 0) tier3Details.push(`${tier3_3month} 3-mo PIF ($${tier3_3monthRevenue.toFixed(0)})`);
+                if (tier3_6month > 0) tier3Details.push(`${tier3_6month} 6-mo PIF ($${tier3_6monthRevenue.toFixed(0)})`);
+                breakdown.push(`Tier 3: ${tier3Details.join(', ')} = $${tier3TotalRevenue.toFixed(0)} (${tier3Hours.toFixed(1)} hours)`);
+            }
+
+            // Online Training
+            const onlineClients = parseInt(document.getElementById('online-clients').value) || 0;
+            if (onlineClients > 0) {
+                const onlineMonthly = onlineClients * 15;
+                const onlineHours = onlineClients * (10/60); // 10 minutes converted to hours
+                
+                monthlyRevenue += onlineMonthly;
+                monthlyHours += onlineHours;
+                breakdown.push(`Online Training: ${onlineClients} clients × $15 = $${onlineMonthly} (${onlineHours.toFixed(1)} hours)`);
+            }
+
+            // OnlyFans
+            const onlyfansClients = parseInt(document.getElementById('onlyfans-clients').value) || 0;
+            if (onlyfansClients > 0) {
+                const onlyfansMonthly = onlyfansClients * 10;
+                const onlyfansHours = 4 * 4; // Fixed 4 hours/week
+                
+                monthlyRevenue += onlyfansMonthly;
+                monthlyHours += onlyfansHours;
+                breakdown.push(`OnlyFans: ${onlyfansClients} subscribers × $10 = $${onlyfansMonthly} (${onlyfansHours.toFixed(1)} hours)`);
+            }
+
+            // Livestream
+            const livestreamSubscribers = parseInt(document.getElementById('livestream-subscribers').value) || 0;
+            if (livestreamSubscribers > 0) {
+                const livestreamMonthly = livestreamSubscribers * 20;
+                const livestreamHours = 1 * 4; // Fixed 1 hour/week regardless of subscriber count
+                
+                monthlyRevenue += livestreamMonthly;
+                monthlyHours += livestreamHours;
+                breakdown.push(`Livestream: ${livestreamSubscribers} subscribers × $20 = $${livestreamMonthly} (${livestreamHours.toFixed(1)} hours)`);
+            }
+
+            // Update display
+            document.getElementById('monthly-revenue').textContent = `$${monthlyRevenue.toFixed(0)}`;
+            document.getElementById('annual-revenue').textContent = `$${(monthlyRevenue * 12).toFixed(0)}`;
+            document.getElementById('monthly-hours').textContent = monthlyHours.toFixed(1);
+            document.getElementById('hourly-rate').textContent = monthlyHours > 0 ? `$${(monthlyRevenue / monthlyHours).toFixed(0)}` : '$0';
+
+            // Update breakdown
+            const breakdownDiv = document.getElementById('breakdown');
+            breakdownDiv.innerHTML = breakdown.length > 0 ? 
+                breakdown.map(item => `<div class="text-white/90">${item}</div>`).join('') : 
+                '<div class="text-white/70">No services selected</div>';
         }
 
-        function addEventListeners() {
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('.minus-btn')) {
-                    const id = e.target.dataset.id;
-                    const input = document.querySelector(`.client-input[data-id="${id}"]`);
-                    let value = parseInt(input.value);
-                    if (value > 0) {
-                        value--;
-                        input.value = value;
-                        state[id] = value;
-                        calculateTotals();
-                    }
-                }
-                if (e.target.matches('.plus-btn')) {
-                    const id = e.target.dataset.id;
-                    const input = document.querySelector(`.client-input[data-id="${id}"]`);
-                    let value = parseInt(input.value);
-                    value++;
-                    input.value = value;
-                    state[id] = value;
-                    calculateTotals();
-                }
+        // Add event listeners to all inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateRevenue);
+                input.addEventListener('change', calculateRevenue);
             });
-
-            document.addEventListener('input', (e) => {
-                 if (e.target.matches('.client-input')) {
-                    const id = e.target.dataset.id;
-                    let value = parseInt(e.target.value);
-                    if (isNaN(value) || value < 0) value = 0;
-                    e.target.value = value; // Sanitize input
-                    state[id] = value;
-                    calculateTotals();
-                }
-            });
-        }
-        
-        // Initialize the app
-        renderPackageItems();
-        addEventListeners();
-        calculateTotals();
-
+            
+            // Initial calculation
+            calculateRevenue();
+        });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d35911b3e2e825',t:'MTc1NzU1MzY4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
